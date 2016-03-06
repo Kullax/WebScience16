@@ -3,6 +3,7 @@ import sys
 import re
 import string
 import tokenizer
+import regular
 import time
 from random import randint
 import codecs
@@ -30,6 +31,9 @@ def run():
         name=w.replace('ø','oe').replace('æ','ae').replace('å','aa')
         # download file
         connector.save_csv(path, name)
+        # Once a csv file has been recovered. Extract the monthly information
+        d = regular.GetArrayFromFile(""+path+name+".csv")
+        print d
 
 if __name__ == "__main__":
     if(len(sys.argv) > 1):
