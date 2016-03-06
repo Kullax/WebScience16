@@ -1,8 +1,8 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
 import re
 import string
+import codecs
 
 stopwords = []
 trends = []
@@ -14,7 +14,7 @@ def get_stopwords():
      for line in f:
       w = line.split(' ', 1)[0]
       if w not in stopwords:
-       stopwords.append(w)
+       stopwords.append(str(w))
     f.close()
 
 def strip(str):
@@ -25,49 +25,42 @@ def strip(str):
     result = re.sub('['+chars+']+', ' ',result)
     return result
 
-def tokenize(file):
+def tokenize(type, v):
+    dest = ""
+    file = ""
+    if v == 0:
+        file = "descriptions/"+type+"/sundhed_dk.txt"
+        dest = "trends/"+type+"_sundhed_dk_records.log"
+    else:
+        file = "descriptions/"+type+"/ssi_dk.txt"
+        dest = "trends/"+type+"_ssi_dk_records.log"
     f = open(file, 'r')
     output = ""
-    for line in f:
-     output += strip(line) + " "
+    output += strip(f.read()) + " "
     f.close()
-    dest = file + "_records.log"
-    with open(dest, "w+") as f:
-     f.write(output)
-    f.close()
+    return output
 
-def find_trend(file1, file2):
+def find_trend(text1, text2):
     first_file = []
-    f = open(file1, 'r')
-    for line in f:
-     for word in line.split():
+    for word in text1.split():
       if word not in first_file:
        first_file.append(word)
-    f.close()
-
-    f = open(file2, 'r')
-    for line in f:
-     for word in line.split():
-      if word in first_file:
-       if word not in trends:
-        trends.append(word)
-    f.close()
-
-    with open("trends.txt", "w+") as f:
-      f.write(str.join(",", trends))
-    f.close()
+    for word in text2.split():
+        if word in first_file:
+            if word not in trends:
+                trends.append(word)
+                print word
     
-def main():
+def run(type="HPV"):
     get_stopwords()
-    if(len(sys.argv) == 3):
-        file1 = sys.argv[1]
-        file2 = sys.argv[2]
-    else:
-        file1 = "descriptions/MFR.txt"
-        file2 = "descriptions/MFR_sundhed.txt"
-    tokenize(file1)
-    tokenize(file2)
-    find_trend(file1+"_records.log", file2+"_records.log")
+    o1 = tokenize(type, 0)
+    o2 = tokenize(type, 1)
+    find_trend(o1, o2)
+    return trends
+
 
 if __name__ == "__main__":
-    main()
+    if(len(sys.argv) > 1):
+        run(sys.argv[1])
+    else:
+        run()
