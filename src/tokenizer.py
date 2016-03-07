@@ -49,18 +49,10 @@ def find_trend(text1, text2):
         if word in first_file:
             if word not in trends:
                 trends.append(word)
-                print word
     
-def run(type="HPV"):
+def run(type):
     get_stopwords()
     o1 = tokenize(type, 0)
     o2 = tokenize(type, 1)
     find_trend(o1, o2)
     return trends
-
-
-if __name__ == "__main__":
-    if(len(sys.argv) > 1):
-        run(sys.argv[1])
-    else:
-        run()
