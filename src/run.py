@@ -1,1 +1,0 @@
-tokenizer.py descriptions/MFR.txt descriptions/MFR_sundhed.txt
