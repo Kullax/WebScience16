@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xml:lang="EN"
+           finalDefault=""
+           blockDefault="#all"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <xs:simpleType name="RestrictedString">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="([a-zA-Z0-9]+(( |_)?))*[a-zA-Z0-9]"/>
+      <xs:minLength value="1"/>
+      <xs:maxLength value="70"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Base64String">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9a-zA-Z\+/=]+"/>
+      <xs:minLength value="1"/>
+      <xs:maxLength value="32"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="Classify">
+    <xs:attribute name="id" type="RestrictedString" use="required"/>
+    <xs:attribute name="username" type="RestrictedString" use="optional"/>
+    <xs:attribute name="classifierName" type="RestrictedString" use="required"/>
+    <xs:attribute name="textId" type="RestrictedString" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="ClassifyKeywords">
+    <xs:attribute name="id" type="RestrictedString" use="required"/>
+    <xs:attribute name="username" type="RestrictedString" use="optional"/>
+    <xs:attribute name="classifierName" type="RestrictedString" use="required"/>
+    <xs:attribute name="textId" type="RestrictedString" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="GetInformation">
+    <xs:attribute name="id" type="RestrictedString" use="required"/>
+    <xs:attribute name="username" type="RestrictedString" use="optional"/>
+    <xs:attribute name="classifierName" type="RestrictedString" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Create">
+    <xs:attribute name="id" type="RestrictedString" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Remove">
+    <xs:attribute name="id" type="RestrictedString" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="AddClass">
+    <xs:attribute name="id" type="RestrictedString" use="required"/>
+    <xs:attribute name="className" type="RestrictedString" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="RemoveClass">
+    <xs:attribute name="id" type="RestrictedString" use="required"/>
+    <xs:attribute name="className" type="RestrictedString" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Train">
+    <xs:attribute name="id" type="RestrictedString" use="required"/>
+    <xs:attribute name="className" type="RestrictedString" use="required"/>
+    <xs:attribute name="textId" type="RestrictedString" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Untrain">
+    <xs:attribute name="id" type="RestrictedString" use="required"/>
+    <xs:attribute name="className" type="RestrictedString" use="required"/>
+    <xs:attribute name="textId" type="RestrictedString" use="required"/>
+  </xs:complexType>
+
+</xs:schema>

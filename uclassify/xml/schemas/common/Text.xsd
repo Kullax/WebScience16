@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xml:lang="EN"
+           finalDefault=""
+           blockDefault="#all"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <xs:complexType name="TextBase64">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="id" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="TextList">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="textBase64" type="TextBase64" minOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

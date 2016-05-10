@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:uc="http://www.uclassify.com/server/XMLConfigSchema"
+           targetNamespace="http://www.uclassify.com/server/XMLConfigSchema"
+           xml:lang="EN"
+           version="1.00"
+           finalDefault=""
+           blockDefault="#all"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+<xs:element name="port">
+  <xs:simpleType>
+    <xs:restriction base="xs:positiveInteger">
+      <xs:maxInclusive value="65535"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:element>
+
+<xs:element name="logLevel">
+  <xs:simpleType>
+    <xs:restriction base="xs:string">
+      <xs:pattern value="log|error|failure"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:element>
+
+<xs:element name="uclassify">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="uc:port"/>
+      <xs:element name="maxInput" type="xs:positiveInteger"/>
+      <xs:element name="maxClients" type="xs:positiveInteger"/>
+      <xs:element name="clientQueueSize" type="xs:positiveInteger"/>
+      <xs:element name="classifierRootPath" type="xs:string"/>
+      <xs:element ref="uc:logLevel"/>
+      <xs:element name="logMemory" type="xs:boolean"/>
+      <xs:element name="saveRequests" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

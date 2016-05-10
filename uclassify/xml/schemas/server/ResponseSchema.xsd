@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:uc="http://api.uclassify.com/1/server/ResponseSchema"
+           targetNamespace="http://api.uclassify.com/1/server/ResponseSchema"
+           xml:lang="EN"
+           version="1.00"
+           finalDefault=""
+           blockDefault="#all"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <xs:include schemaLocation="../common/ResponseCallLists.xsd"/>
+  <xs:include schemaLocation="../common/Status.xsd"/>
+
+  <xs:element name="uclassify">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="status" type="uc:Status" minOccurs="1" maxOccurs="1"/>
+        <xs:choice minOccurs="0">
+          <xs:element name="readCalls" type="uc:ResponseReadCallList"/>
+          <xs:element name="writeCalls" type="uc:ResponseWriteCallList"/>
+        </xs:choice>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:decimal" use="required"/>
+    </xs:complexType>
+
+    <xs:unique name="uniqueClasses">
+      <xs:selector xpath="uc:callList/uc:class"/>
+      <xs:field xpath="@name"/>
+    </xs:unique>
+
+    <xs:unique name="uniqueIds">
+      <xs:selector xpath="uc:callList/*"/>
+      <xs:field xpath="@id"/>
+    </xs:unique>
+  </xs:element>
+
+</xs:schema>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<uclassify xmlns="http://www.uclassify.com/server/XMLConfigSchema">
+
+  <!-- Sets the port the server will listen to. -->
+  <port>54441</port>
+
+  <!-- Sets the max allowed size in bytes for a request. -->
+  <maxInput>2000000</maxInput>
+
+  <!-- Sets the max number of connected clients. -->
+  <maxClients>20</maxClients>
+
+  <!-- Sets the size of the client queue. -->
+  <clientQueueSize>20</clientQueueSize>
+
+  <!-- The root directory to the classifier files, if empty the default root will be used (dir is directly under the server). -->
+  <classifierRootPath>C:\uClassify Server\classifiers</classifierRootPath>
+
+  <!-- Sets the wanted log level for the entire server: log, error, failure. -->
+  <logLevel>log</logLevel>
+
+  <!-- Set to true if you want memory debugging associated with every log output. -->
+  <logMemory>true</logMemory>
+
+  <!-- Set to true to save incoming requests. These will be saved under logs/requests. -->
+  <saveRequests>false</saveRequests>
+
+</uclassify>

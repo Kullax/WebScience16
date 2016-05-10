@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xml:lang="EN"
+           finalDefault=""
+           blockDefault="#all"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <xs:include schemaLocation="ResponseCalls.xsd"/>
+
+  <xs:complexType name="ResponseReadCallList">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="classify" type="Classify" minOccurs="0"/>
+      <xs:element name="classifyKeywords" type="ClassifyKeywords" minOccurs="0"/>
+      <xs:element name="getInformation" type="GetInformation" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ResponseWriteCallList">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="create" type="Create" minOccurs="0"/>
+      <xs:element name="remove" type="Remove" minOccurs="0"/>
+      <xs:element name="addClass" type="AddClass" minOccurs="0"/>
+      <xs:element name="removeClass" type="RemoveClass" minOccurs="0"/>
+      <xs:element name="train" type="Train" minOccurs="0"/>
+      <xs:element name="untrain" type="Untrain" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

@@ -1,96 +1,200 @@
 # -*- coding: utf-8 -*-
-#importing pytrends and dependencies
-import time
-from random import randint
-from pytrends.pyGTrends import pyGTrends
-
-import re
-import numpy as np
-from matplotlib import pyplot as plt
-
-#importing prediction tool
+import xml
+import string
+import pickle
 from sklearn import cross_validation, linear_model
 from sklearn.metrics import mean_squared_error
+# Module for fixing unicode errors made on the forum, there's a few of these in our data. pip install ftfy
+#import ftfy
+import json
+# pip install gspread
+import gspread
+# pip install oauth2client==1.5.2 if cannot import name error. Rollbacks are troublesome.
+from oauth2client.client import SignedJwtAssertionCredentials
+from uclassify import uclassify
+import numpy as np
+from itertools import chain
+from enum import Enum
+from operator import itemgetter
 
-# import other written code modules needed
-import tokenizer, regular
+class Sentiment(Enum):
+    negative = 0
+    neutral = 1
+    positive = 2
 
+def DownloadReviewData():
+    """
+    Connects to google drive, and gives access to the spreadsheets
+    """
+    # Unique json file for Project with Private Copy of Shared Spreedsheet.
+    json_key = json.load(open('WebScience2016-825a037eea0f.json'))
+    scope = ['https://spreadsheets.google.com/feeds']
+    credentials = SignedJwtAssertionCredentials(json_key['client_email'], json_key['private_key'].encode(), scope)
+    gc = gspread.authorize(credentials)
+    print "Connecting to google drive"
+    # Copy of the original spreedsheet.
+    wks = gc.open("Sentiment Annotations - WS").sheet1
+    print "Retrieving Sentiments"
+    sentinent = wks.col_values(2)
+    print "Retrieving Reviews"
+    reviews = wks.col_values(4)
+    r_s = []
+    r_r = []
+    for sen, rev in zip(sentinent, reviews):
+        if rev != "":
+            try:
+                s = int(sen)
+                r_s.append(sen)
+                r_r.append(rev)
+            except ValueError:
+                print "Invalid Sentiment", sen
+    with open("rawSentiment", 'wb') as f:
+        pickle.dump(r_s, f)
+    with open("rawReviews", 'wb') as f:
+        pickle.dump(r_r, f)
 
-# Temp list for creating X for Lasso
-def run(type, online=True):
-    # Lasso Prediction - tolerance set to avoid converge warning
-    model = linear_model.Lasso(tol=0.001)
-
-    tmp = []
-    google_username = "xxx@gmail.com" # We Be Anomynous
-    google_password = "yyyyyy"
-    # Location for .csv
-    path = "trends/"+type+"/"
-
-    # Using pytrends for gathering data from Google - but only if online, else uses local data
-    # connect to Google
-    if online:
-        connector = pyGTrends(google_username, google_password)
-    # tokenizer will determine the trends needed
-    for trend in tokenizer.run(type):
-        # file names should avoid danish specialcases
-        name=trend.replace('ø','oe').replace('æ','ae').replace('å','aa')
-        if online:
-            # make request
-            connector.request_report(str(trend), hl='dk', geo='DK', date="01/2011 57m")
-            # wait a random amount of time between requests to avoid bot detection
-            time.sleep(randint(3, 6))
-            # download file
-            connector.save_csv(path, name)
-        # Once a csv file has been recovered. Extract the monthly information
-        months = regular.GetArrayFromFile(""+path+name+".csv")
-        if months != None:
-            tmp.append(months)
-    # Convert the tmp list to a numpy array of proper dimension
-    X = np.array(tmp).transpose()
-    # Extract clinical data
-    json_pattern = re.compile('[0-9]+\.[0-9]+')
-    f = open("vactionations/"+type+"-1.json", "r")
-    data = f.read()
-    f.close()
-    match = json_pattern.findall(data)
-    # Y is now the clinical data
-    Y = np.array([float(x) for x in match][0:len(X)])
-    # Preform 5-fold crossvalidation
-    k_fold = cross_validation.KFold(len(X), 5)
-    v = 0
-    plt.figure(type + " 5-fold graphs")
+def DoClassify():
+    """
+    Remember to start a local server first, as this is an entirely offline approach
+    Trains and Evaluates using uClassify
+    """
+    with open("rawSentiment", 'rb') as f:
+        sentiment = pickle.load(f)
+        del sentiment[0]
+    with open("rawReviews", 'rb') as f:
+        review = pickle.load(f)
+        del review[0]
+    review = np.array([x.encode('ascii', 'ignore') for x in review])
+    sentiment = np.array(sentiment)
+    classifier_name = "Lego_Review"
+    a = uclassify()
+    max = 50
+    it = 0
+    positive = []
+    negative = []
+    neutral = []
+    a.removeClassifier("fold%d"%0)
+    a.removeClassifier("fold%d"%1)
+    a.removeClassifier("fold%d"%2)
+    k_fold = cross_validation.KFold(len(review), 3)
     for k, (train, test) in enumerate(k_fold):
-        model.fit(X[train], Y[train])
-        plot_y = model.predict(X[test])
-        plt.subplot(5, 1, k+1)
-        plt.ylabel("Fold %s" % (k+1))
-        plot_x = range(len(plot_y))
-        plt.plot(plot_x, plot_y, color='b', label='Prediction')
-        plt.plot(plot_x, Y[test], color='r', label='Clinical')
-        # RMSE for each fold is summed
-        RMSE = mean_squared_error(Y[test],plot_y)
-        v += RMSE
-        print test
-    # overall RMSE is determined
-    print type, "RMSE", np.sqrt(v/5)
-    # For fun, a full prediction is made, to compare the model after 5 folds
-    # and the ground truth data
-    plt.xlabel("Months")
-    plt.show()
-    plt.figure(type + " full prediction")
-    plot_y = model.predict(X)
-    plot_x = range(len(plot_y))
-    plt.plot(plot_x, plot_y, color='b', label='Prediction')
-    plt.plot(plot_x, Y, color='r', label='Clinical')
-    plt.xlabel("Months")
-    plt.legend(loc="upper right", fancybox=True)
-    plt.show()
-    
+        t=0
+        f=0
+        print k
+        a.create("fold%d"%k)
+        a.addClass(["Negative", "Neutral", "Positive"],"fold%d"%k)
+        for r,s in zip(review[train], sentiment[train]):
+            try:
+                if s == "1":
+                    positive.append(r)
+                elif s == "-1":
+                    negative.append(r)
+                elif s == "0":
+                   # print r
+                    neutral.append(r)
+                if len(positive) > 50:
+                    a.train(positive, "Positive", "fold%d"%k)
+                    positive = []
+                if len(negative) > 50:
+                    a.train(negative, "Negative", "fold%d"%k)
+                    negative = []
+                if len(neutral) > 50:
+                    a.train(neutral, "Neutral", "fold%d"%k)
+                    neutral = []
+            except UnicodeEncodeError, ex:
+                print "Cannot train; ", ex
+        # Any leftover should not be excluded
+        if len(positive) > 0:
+            a.train(positive, "Positive", "fold%d"%k)
+            positive = []
+        if len(negative) > 0:
+            a.train(negative, "Negative", "fold%d"%k)
+            negative = []
+        if len(neutral) > 0:
+            a.train(neutral, "Neutral", "fold%d"%k)
+            neutral = []
+        it = 0
+        print "testing"
+        while it+50 < len(test):
+            d = a.classify(review[test[it:it+50]],"fold%d"%k)
+            for dd, ss in zip(d, sentiment[test[it:it+50]]):
+                # will take the calculated sentiment, and compare to the ground truth
+                if Sentiment(np.array([float(x[1]) for x in dd[2]]).argmax()).value-1 == int(ss):
+                    # if equal, increment true
+                    t+=1
+                else:
+                    # else increment false
+                    f+=1
+            it += 50
+        d = a.classify(review[test[it:len(test)]],"fold%d"%k)
+        print t, f
+    a.removeClassifier(classifier_name)
 
-if __name__ == "__main__":
-    type = "PVC"
-    run(type, False)
-    type = "HPV"
-    run(type, False)
+def GenerateStanfordData():
+    """
+    Splits the reviews to manageable pieces for the Stanford NLP.
+    And converts the -1,0,1 rating to 01,2,3,4 rating.
+    """
+    with open("rawSentiment", 'rb') as f:
+        sentiment = pickle.load(f)
+        del sentiment[0]
+    with open("rawReviews", 'rb') as f:
+        review = pickle.load(f)
+        del review[0]
+    review = np.array([x.encode('ascii', 'ignore') for x in review])
+    reviews = []
+    sentiment = np.array(sentiment)
+    k = 98
+    with open("ReadyForStanford.txt", 'w') as f:
+            for r,s in zip(review, sentiment):
+                a = ""
+                if s == "-1":
+                    a = "1"
+                elif s == "0":
+                    a = "2"
+                elif s == "1":
+                    a = "3"
+                else:
+                    print s
+                for line in r.split("."):
+                    if line.strip().translate(string.maketrans("",""), string.punctuation) != "":
+                        f.write(a+"\t"+line+"\n\n")
+                        reviews.append(line)
+    # Multilined version of original reviews. Having too big reviews could cause problems.
+    with open("rawrReviews", 'wb') as f:
+        pickle.dump(reviews, f)
 
+def FoldStanfordData():
+    """
+    Splits the data tree generated after GenerateStanfordData() was processed by the Stanford Toolkit
+    into training and testing sections for 3-fold cross validation.
+    """
+    # Multilined version of original reviews. Having too big reviews could cause problems.
+    with open("rawrReviews", 'rb') as f:
+        review = pickle.load(f)
+    # tree_non being the name of the GenerateStanfordData function, change to tree_non for non sentiment tree.
+    with open("tree_non.txt", 'r') as reviews:
+        lines = reviews.readlines()
+        k_fold = cross_validation.KFold(len(lines), 3)
+        for k, (train, test) in enumerate(k_fold):
+            print train, test
+            with open("train%d.txt"%k, 'w') as f:
+                for t in train:
+                    f.write(lines[t]+"\n")
+            with open("test%d.txt"%k, 'w') as f:
+                for t in test:
+                    f.write(lines[t]+"\n")
+
+# Have internet on for this
+DownloadReviewData()
+# Turn on a uClassify Server, and have modified socket access to localhost instead of website
+try:
+    DoClassify()
+except:
+    print "Is server on?"
+# Deep-Learning Start here - still depends on DownloadReviewData()
+# Makes review and sentiment into a mangeable format for Stanford NLP
+GenerateStanfordData()
+# Only run AFTER having produced the Tree Data using the NLP.
+FoldStanfordData()
+# Now to training and testing using train.sh script.

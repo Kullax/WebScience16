@@ -1,0 +1,11 @@
+Using the stanford, It's trained for, and only really preforms well if used on single sentences.
+Reviews which consist of multible sentences were split up, and each marked with a rating.
+(Very) Positive
+(Very) Negative
+Neutral
+
+Parsing long sentences will run out of memory ("WARNING: Parsing of sentence ran out of memory (length=523). Will ignore and continue")
+
+According to stackoverflow the runtime is O(n^3) (http://stackoverflow.com/questions/29543274/stanford-nlp-annotate-text-is-very-slow)
+
+Unicode errors, which occured on the forum, can mess with the Stanford program, and needs to be fixed before parsed.

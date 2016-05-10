@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xml:lang="EN"
+           finalDefault=""
+           blockDefault="#all"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+  <xs:complexType name="Class">
+    <xs:attribute name="className" type="xs:string" use="required"/>
+    <xs:attribute name="p" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:double">
+          <xs:minInclusive value="0"/>
+          <xs:maxInclusive value="1"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  
+  <xs:complexType name="KeywordClass">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="className" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="Classification">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded"> 
+      <xs:element name="class" type="Class"/>
+    </xs:sequence>
+    <xs:attribute name="textCoverage" type="xs:double" use="optional"/>
+  </xs:complexType>
+
+  <xs:complexType name="Keywords">
+    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="class" type="KeywordClass"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ClassInformation">
+    <xs:sequence>
+      <xs:element name="uniqueFeatures" type="xs:nonNegativeInteger"/>
+      <xs:element name="totalCount" type="xs:nonNegativeInteger"/>
+    </xs:sequence>
+    <xs:attribute name="className" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Classes">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="classInformation" type="ClassInformation"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Classify">
+    <xs:sequence>
+      <xs:element name="classification" type ="Classification" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="ClassifyKeywords">
+    <xs:sequence>
+      <xs:element name="classification" type ="Classification" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="keywords" type ="Keywords" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="GetInformation">
+    <xs:sequence>
+      <xs:element name="classes" type ="Classes" minOccurs="1" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Create">
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Remove">
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="AddClass">
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="RemoveClass">
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Train">
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="Untrain">
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+</xs:schema>

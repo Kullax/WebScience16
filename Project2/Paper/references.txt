@@ -1,0 +1,4 @@
+https://github.com/burnash/gspread
+http://nlp.stanford.edu/sentiment/
+http://sentistrength.wlv.ac.uk/
+http://ftfy.readthedocs.org/en/latest/
